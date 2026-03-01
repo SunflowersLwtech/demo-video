@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#12122a"/>
+      <stop offset="100%" style="stop-color:#0a0a14"/>
+    </radialGradient>
+    <radialGradient id="tableGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#1a1a3a"/>
+      <stop offset="85%" style="stop-color:#14142c"/>
+      <stop offset="100%" style="stop-color:#0f0f24"/>
+    </radialGradient>
+    <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#ff6b35;stop-opacity:0"/>
+    </radialGradient>
+    <filter id="orangeGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6"/>
+    </filter>
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="90" ry="90" fill="url(#bgGrad)"/>
+
+  <!-- Subtle outer ring glow -->
+  <circle cx="256" cy="256" r="190" fill="none" stroke="#ff6b35" stroke-width="1" opacity="0.15"/>
+  <circle cx="256" cy="256" r="192" fill="none" stroke="#ff6b35" stroke-width="0.5" opacity="0.08"/>
+
+  <!-- Center glow -->
+  <circle cx="256" cy="256" r="120" fill="url(#glowGrad)"/>
+
+  <!-- Council table (ellipse for perspective) -->
+  <ellipse cx="256" cy="268" rx="95" ry="65" fill="url(#tableGrad)" stroke="#ff6b35" stroke-width="2" opacity="0.9"/>
+
+  <!-- Inner table detail -->
+  <ellipse cx="256" cy="268" rx="60" ry="40" fill="none" stroke="#ff6b35" stroke-width="0.8" opacity="0.3"/>
+
+  <!-- Gavel icon in center of table -->
+  <g transform="translate(256, 258)" opacity="0.85">
+    <!-- Gavel handle -->
+    <line x1="-18" y1="12" x2="18" y2="-12" stroke="#ff6b35" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- Gavel head -->
+    <rect x="14" y="-22" width="18" height="10" rx="3" ry="3" fill="#ff6b35" transform="rotate(-34, 22, -16)"/>
+  </g>
+
+  <!-- Council member figures (6 seats around table) -->
+  <!-- Position 1 - top (THE TRAITOR - highlighted orange) -->
+  <g transform="translate(256, 160)">
+    <!-- Glow behind traitor -->
+    <circle cx="0" cy="8" r="22" fill="#ff6b35" opacity="0.15" filter="url(#orangeGlow)"/>
+    <!-- Head -->
+    <circle cx="0" cy="0" r="14" fill="#ff6b35"/>
+    <!-- Body -->
+    <path d="M-12,16 Q-12,8 0,6 Q12,8 12,16 Z" fill="#ff6b35"/>
+    <!-- Mask/eye slit -->
+    <rect x="-8" y="-3" width="16" height="4" rx="2" fill="#0a0a14" opacity="0.7"/>
+  </g>
+
+  <!-- Position 2 - top right -->
+  <g transform="translate(358, 210)">
+    <circle cx="0" cy="0" r="13" fill="#c8c8e0" opacity="0.7"/>
+    <path d="M-11,15 Q-11,7 0,5 Q11,7 11,15 Z" fill="#c8c8e0" opacity="0.7"/>
+    <rect x="-7" y="-3" width="14" height="3.5" rx="1.8" fill="#0a0a14" opacity="0.5"/>
+  </g>
+
+  <!-- Position 3 - bottom right -->
+  <g transform="translate(348, 320)">
+    <circle cx="0" cy="0" r="13" fill="#c8c8e0" opacity="0.7"/>
+    <path d="M-11,15 Q-11,7 0,5 Q11,7 11,15 Z" fill="#c8c8e0" opacity="0.7"/>
+    <rect x="-7" y="-3" width="14" height="3.5" rx="1.8" fill="#0a0a14" opacity="0.5"/>
+  </g>
+
+  <!-- Position 4 - bottom -->
+  <g transform="translate(256, 370)">
+    <circle cx="0" cy="0" r="13" fill="#c8c8e0" opacity="0.7"/>
+    <path d="M-11,15 Q-11,7 0,5 Q11,7 11,15 Z" fill="#c8c8e0" opacity="0.7"/>
+    <rect x="-7" y="-3" width="14" height="3.5" rx="1.8" fill="#0a0a14" opacity="0.5"/>
+  </g>
+
+  <!-- Position 5 - bottom left -->
+  <g transform="translate(164, 320)">
+    <circle cx="0" cy="0" r="13" fill="#c8c8e0" opacity="0.7"/>
+    <path d="M-11,15 Q-11,7 0,5 Q11,7 11,15 Z" fill="#c8c8e0" opacity="0.7"/>
+    <rect x="-7" y="-3" width="14" height="3.5" rx="1.8" fill="#0a0a14" opacity="0.5"/>
+  </g>
+
+  <!-- Position 6 - top left -->
+  <g transform="translate(154, 210)">
+    <circle cx="0" cy="0" r="13" fill="#c8c8e0" opacity="0.7"/>
+    <path d="M-11,15 Q-11,7 0,5 Q11,7 11,15 Z" fill="#c8c8e0" opacity="0.7"/>
+    <rect x="-7" y="-3" width="14" height="3.5" rx="1.8" fill="#0a0a14" opacity="0.5"/>
+  </g>
+
+  <!-- Connecting lines from figures to table (subtle) -->
+  <line x1="256" y1="176" x2="256" y2="203" stroke="#ff6b35" stroke-width="0.8" opacity="0.2"/>
+  <line x1="348" y1="220" x2="320" y2="240" stroke="#c8c8e0" stroke-width="0.6" opacity="0.12"/>
+  <line x1="338" y1="315" x2="315" y2="295" stroke="#c8c8e0" stroke-width="0.6" opacity="0.12"/>
+  <line x1="256" y1="358" x2="256" y2="333" stroke="#c8c8e0" stroke-width="0.6" opacity="0.12"/>
+  <line x1="174" y1="315" x2="197" y2="295" stroke="#c8c8e0" stroke-width="0.6" opacity="0.12"/>
+  <line x1="164" y1="220" x2="192" y2="240" stroke="#c8c8e0" stroke-width="0.6" opacity="0.12"/>
+
+  <!-- Corner accent marks -->
+  <line x1="40" y1="60" x2="60" y2="60" stroke="#ff6b35" stroke-width="1.5" opacity="0.3" stroke-linecap="round"/>
+  <line x1="40" y1="60" x2="40" y2="80" stroke="#ff6b35" stroke-width="1.5" opacity="0.3" stroke-linecap="round"/>
+
+  <line x1="472" y1="60" x2="452" y2="60" stroke="#ff6b35" stroke-width="1.5" opacity="0.3" stroke-linecap="round"/>
+  <line x1="472" y1="60" x2="472" y2="80" stroke="#ff6b35" stroke-width="1.5" opacity="0.3" stroke-linecap="round"/>
+
+  <line x1="40" y1="452" x2="60" y2="452" stroke="#ff6b35" stroke-width="1.5" opacity="0.3" stroke-linecap="round"/>
+  <line x1="40" y1="452" x2="40" y2="432" stroke="#ff6b35" stroke-width="1.5" opacity="0.3" stroke-linecap="round"/>
+
+  <line x1="472" y1="452" x2="452" y2="452" stroke="#ff6b35" stroke-width="1.5" opacity="0.3" stroke-linecap="round"/>
+  <line x1="472" y1="452" x2="472" y2="432" stroke="#ff6b35" stroke-width="1.5" opacity="0.3" stroke-linecap="round"/>
+</svg>
