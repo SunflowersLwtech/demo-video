@@ -14,6 +14,11 @@ import { StarField3D } from "../components/three/StarField3D";
 import { VoteTallyBar } from "../components/ui/VoteTallyBar";
 import { GlassCard } from "../components/ui/GlassCard";
 import { PhaseLabel } from "../components/ui/PhaseLabel";
+import { GlitchFlash } from "../components/effects/GlitchFlash";
+import { ScreenShake } from "../components/effects/ScreenShake";
+import { EnergyBurst } from "../components/effects/EnergyBurst";
+import { ContrastGrade } from "../components/effects/ContrastGrade";
+import { ScanLines } from "../components/effects/ScanLines";
 import { loadFont } from "@remotion/google-fonts/Inter";
 
 const { fontFamily } = loadFont();
@@ -41,15 +46,15 @@ export const S10_VotingPhase: React.FC = () => {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
 
-  // Red tint overlay pulses
-  const redPulse = 0.05 + Math.sin(frame * 0.1) * 0.03;
+  // Red tint overlay pulses — 4x stronger
+  const redPulse = 0.12 + Math.sin(frame * 0.1) * 0.08;
 
   // Tally panel slides in
   const tallyOpacity = interpolate(frame, [40, 60], [0, 1], {
     extrapolateRight: "clamp",
   });
 
-  return (
+  const sceneContent = (
     <div
       style={{
         width: "100%",
@@ -80,8 +85,7 @@ export const S10_VotingPhase: React.FC = () => {
         style={{
           position: "absolute",
           inset: 0,
-          background: "rgba(204,34,68,0.06)",
-          opacity: redPulse / 0.08,
+          background: `rgba(204,34,68,${redPulse})`,
           pointerEvents: "none",
         }}
       />
@@ -139,7 +143,7 @@ export const S10_VotingPhase: React.FC = () => {
                   agentName={agent.name}
                   agentColor={agent.color}
                   votes={Math.min(revealedVotes, vote.votes)}
-                  maxVotes={7}
+                  maxVotes={AGENTS.length}
                   startFrame={50 + i * 10}
                 />
               );
@@ -183,6 +187,27 @@ export const S10_VotingPhase: React.FC = () => {
           })}
         </div>
       </div>
+
+      {/* GlitchFlash per vote reveal (red tinted) */}
+      {VOTE_REVEALS.map((reveal, i) => (
+        <GlitchFlash key={`glitch-${i}`} startFrame={reveal.frame} duration={4} color="#cc2244" />
+      ))}
+
+      {/* Big GlitchFlash + EnergyBurst when majority reached (4th vote for Lyra, frame 135) */}
+      <GlitchFlash startFrame={135} duration={6} color="#cc2244" />
+      <EnergyBurst startFrame={135} color="#cc2244" particleCount={25} />
+
+      {/* ScanLines overlay */}
+      <ScanLines opacity={0.05} />
     </div>
+  );
+
+  // Single dramatic shake only at the majority decision moment
+  return (
+    <ContrastGrade brightness={1} contrast={1.15} saturate={0.9}>
+      <ScreenShake startFrame={135} intensity={5} duration={10}>
+        {sceneContent}
+      </ScreenShake>
+    </ContrastGrade>
   );
 };

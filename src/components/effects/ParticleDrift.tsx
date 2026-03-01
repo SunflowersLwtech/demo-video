@@ -16,6 +16,11 @@ interface ParticleDriftProps {
   direction?: "up" | "down";
 }
 
+// Deterministic seeded pseudo-random (Remotion requires deterministic rendering)
+function seededRand(seed: number): number {
+  return (((seed * 2654435761) >>> 0) % 10000) / 10000;
+}
+
 export const ParticleDrift: React.FC<ParticleDriftProps> = ({
   count = 50,
   color = "#ff6b35",
@@ -29,12 +34,12 @@ export const ParticleDrift: React.FC<ParticleDriftProps> = ({
     const arr: Particle[] = [];
     for (let i = 0; i < count; i++) {
       arr.push({
-        x: Math.random() * 1920,
-        y: Math.random() * 1080,
-        size: 2 + Math.random() * 4,
-        speed: 20 + Math.random() * 40,
-        opacity: 0.2 + Math.random() * 0.6,
-        delay: Math.random() * 5,
+        x: seededRand(i * 6 + 1) * 1920,
+        y: seededRand(i * 6 + 2) * 1080,
+        size: 2 + seededRand(i * 6 + 3) * 4,
+        speed: 20 + seededRand(i * 6 + 4) * 40,
+        opacity: 0.2 + seededRand(i * 6 + 5) * 0.6,
+        delay: seededRand(i * 6 + 6) * 5,
       });
     }
     return arr;

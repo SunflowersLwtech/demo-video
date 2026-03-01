@@ -12,14 +12,19 @@ import { SceneLighting3D } from "../components/three/SceneLighting3D";
 import { SciFiFloor3D } from "../components/three/SciFiFloor3D";
 import { StarField3D } from "../components/three/StarField3D";
 import { AgentCard } from "../components/ui/AgentCard";
+import { ScreenShake } from "../components/effects/ScreenShake";
+import { GlitchFlash } from "../components/effects/GlitchFlash";
+import { ScanLines } from "../components/effects/ScanLines";
 
 export const S05_CharacterGen: React.FC = () => {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
 
-  // Agents materialize one by one (every ~30 frames)
+  // Agents materialize one by one (every ~28 frames)
+  const agentAppearFrames = AGENTS.map((_, i) => 20 + i * 28);
+
   const agentVisibility = AGENTS.map((_, i) => {
-    const appearFrame = 20 + i * 28;
+    const appearFrame = agentAppearFrames[i];
     return interpolate(frame, [appearFrame, appearFrame + 15], [0, 1], {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
@@ -29,7 +34,11 @@ export const S05_CharacterGen: React.FC = () => {
   // Card overlay appears after agents
   const cardStartFrame = 20 + AGENTS.length * 28 + 10;
 
+  // Single subtle shake at the first and last agent appearance
   return (
+    <ScreenShake startFrame={agentAppearFrames[0]} intensity={3} duration={8}>
+    <ScreenShake startFrame={agentAppearFrames[AGENTS.length - 1]} intensity={4} duration={10}>
+
     <div
       style={{
         width: "100%",
@@ -59,13 +68,13 @@ export const S05_CharacterGen: React.FC = () => {
         <fog attach="fog" args={["#060612", 10, 30]} />
       </ThreeCanvas>
 
-      {/* Agent flash effects */}
+      {/* Agent flash effects — increased intensity to 1.0 */}
       {AGENTS.map((agent, i) => {
-        const appearFrame = 20 + i * 28;
+        const appearFrame = agentAppearFrames[i];
         const flashOpacity = interpolate(
           frame,
           [appearFrame, appearFrame + 5, appearFrame + 15],
-          [0, 0.6, 0],
+          [0, 1.0, 0],
           { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
         );
         return (
@@ -78,6 +87,19 @@ export const S05_CharacterGen: React.FC = () => {
               opacity: flashOpacity,
               pointerEvents: "none",
             }}
+          />
+        );
+      })}
+
+      {/* GlitchFlash on alternating agents (every other agent) */}
+      {AGENTS.map((agent, i) => {
+        if (i % 2 !== 0) return null; // even-indexed agents get glitch
+        return (
+          <GlitchFlash
+            key={`glitch-${agent.id}`}
+            startFrame={agentAppearFrames[i]}
+            duration={5}
+            color={agent.color}
           />
         );
       })}
@@ -102,6 +124,11 @@ export const S05_CharacterGen: React.FC = () => {
           />
         ))}
       </div>
+
+      {/* ScanLines overlay */}
+      <ScanLines opacity={0.04} />
     </div>
+    </ScreenShake>
+    </ScreenShake>
   );
 };

@@ -2,6 +2,12 @@ import React from "react";
 import { useCurrentFrame, interpolate } from "remotion";
 import { MistralBadge } from "../components/ui/MistralBadge";
 import { ParticleDrift } from "../components/effects/ParticleDrift";
+import { TextSlam } from "../components/effects/TextSlam";
+import { ScreenShake } from "../components/effects/ScreenShake";
+import { GlitchFlash } from "../components/effects/GlitchFlash";
+import { ZoomPunch } from "../components/effects/ZoomPunch";
+import { PulseRing } from "../components/effects/PulseRing";
+import { ScanLines } from "../components/effects/ScanLines";
 import { loadFont as loadHeading } from "@remotion/google-fonts/PlayfairDisplay";
 import { loadFont as loadBody } from "@remotion/google-fonts/Inter";
 
@@ -11,10 +17,7 @@ const bodyFont = loadBody();
 export const S15_CallToAction: React.FC = () => {
   const frame = useCurrentFrame();
 
-  // Title scale in
-  const titleScale = interpolate(frame, [10, 40], [0.8, 1], {
-    extrapolateRight: "clamp",
-  });
+  // Title opacity (TextSlam handles the scale animation now)
   const titleOpacity = interpolate(frame, [10, 30], [0, 1], {
     extrapolateRight: "clamp",
   });
@@ -43,6 +46,7 @@ export const S15_CallToAction: React.FC = () => {
   const glowPulse = 0.15 + Math.sin(frame * 0.08) * 0.05;
 
   return (
+    <ScreenShake startFrame={15} intensity={5} duration={15}>
     <div
       style={{
         width: "100%",
@@ -57,6 +61,15 @@ export const S15_CallToAction: React.FC = () => {
       }}
     >
       <ParticleDrift count={40} color="#ff6b35" direction="up" />
+
+      {/* PulseRing from title center when title appears */}
+      <PulseRing startFrame={30} count={3} color="#ff6b35" maxRadius={400} />
+
+      {/* GlitchFlash entrance for tagline */}
+      <GlitchFlash startFrame={45} duration={4} color="#ff6b35" />
+
+      {/* ScanLines overlay */}
+      <ScanLines opacity={0.03} />
 
       {/* Background glow */}
       <div
@@ -74,28 +87,29 @@ export const S15_CallToAction: React.FC = () => {
         }}
       />
 
-      {/* COUNCIL */}
-      <div
-        style={{
-          opacity: titleOpacity,
-          transform: `scale(${titleScale})`,
-          textAlign: "center",
-        }}
-      >
-        <h1
+      {/* COUNCIL — TextSlam + ScreenShake instead of simple scale/opacity */}
+      <TextSlam startFrame={15} fromScale={2.0} damping={10}>
+        <div
           style={{
-            fontFamily: heading.fontFamily,
-            fontSize: 160,
-            fontWeight: 900,
-            color: "#e4e4e7",
-            letterSpacing: "0.15em",
-            margin: 0,
-            lineHeight: 1,
+            opacity: titleOpacity,
+            textAlign: "center",
           }}
         >
-          COUNCIL
-        </h1>
-      </div>
+          <h1
+            style={{
+              fontFamily: heading.fontFamily,
+              fontSize: 160,
+              fontWeight: 900,
+              color: "#e4e4e7",
+              letterSpacing: "0.15em",
+              margin: 0,
+              lineHeight: 1,
+            }}
+          >
+            COUNCIL
+          </h1>
+        </div>
+      </TextSlam>
 
       {/* Orange line */}
       <div
@@ -121,10 +135,12 @@ export const S15_CallToAction: React.FC = () => {
         </p>
       </div>
 
-      {/* Mistral badge */}
-      <div style={{ opacity: badgeOpacity, marginTop: 40 }}>
-        <MistralBadge size="large" />
-      </div>
+      {/* Mistral badge — ZoomPunch entrance */}
+      <ZoomPunch startFrame={75} from={1.4} damping={12}>
+        <div style={{ opacity: badgeOpacity, marginTop: 40 }}>
+          <MistralBadge size="large" />
+        </div>
+      </ZoomPunch>
 
       {/* Credits */}
       <div
@@ -143,9 +159,10 @@ export const S15_CallToAction: React.FC = () => {
             margin: 0,
           }}
         >
-          Built for the Mistral AI Hackathon 2025
+          Built for the Mistral AI Hackathon 2026
         </p>
       </div>
     </div>
+    </ScreenShake>
   );
 };

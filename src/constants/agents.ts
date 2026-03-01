@@ -1,4 +1,4 @@
-// 7 AI agent configurations for the COUNCIL demo
+// AI agent configurations for the COUNCIL demo
 export interface AgentConfig {
   id: string;
   name: string;

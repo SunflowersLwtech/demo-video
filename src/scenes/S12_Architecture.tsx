@@ -3,6 +3,9 @@ import { useCurrentFrame, interpolate } from "remotion";
 import { ArchNode } from "../components/ui/ArchNode";
 import { FadeIn } from "../components/effects/FadeIn";
 import { PhaseLabel } from "../components/ui/PhaseLabel";
+import { ZoomPunch } from "../components/effects/ZoomPunch";
+import { PulseRing } from "../components/effects/PulseRing";
+import { ScanLines } from "../components/effects/ScanLines";
 import { loadFont as loadHeading } from "@remotion/google-fonts/PlayfairDisplay";
 import { loadFont as loadBody } from "@remotion/google-fonts/Inter";
 
@@ -62,7 +65,7 @@ export const S12_Architecture: React.FC = () => {
         </FadeIn>
       </div>
 
-      {/* Connection lines (SVG) */}
+      {/* Connection lines (SVG) with animated data flowing dots */}
       <svg
         style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
         viewBox="0 0 1920 1080"
@@ -77,35 +80,112 @@ export const S12_Architecture: React.FC = () => {
             [0, 0.2],
             { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
           );
+
+          // Data flowing dot: animate a circle along the connection line
+          const dotDelay = lineStart + 20; // dot starts after line is visible
+          const dotCycleDuration = 40; // frames per cycle
+          const dotElapsed = Math.max(0, frame - dotDelay);
+          const dotProgress = (dotElapsed % dotCycleDuration) / dotCycleDuration;
+          const dotX = from.x + (to.x - from.x) * dotProgress;
+          const dotY = from.y + (to.y - from.y) * dotProgress;
+          const dotVisible = frame >= dotDelay ? 1 : 0;
+          // Fade dot at edges of journey
+          const dotOpacity = interpolate(
+            dotProgress,
+            [0, 0.1, 0.9, 1],
+            [0, 0.8, 0.8, 0],
+            { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+          );
+
+          // Second dot offset by half a cycle for more flowing look
+          const dotProgress2 = ((dotElapsed + dotCycleDuration / 2) % dotCycleDuration) / dotCycleDuration;
+          const dotX2 = from.x + (to.x - from.x) * dotProgress2;
+          const dotY2 = from.y + (to.y - from.y) * dotProgress2;
+          const dotOpacity2 = interpolate(
+            dotProgress2,
+            [0, 0.1, 0.9, 1],
+            [0, 0.6, 0.6, 0],
+            { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+          );
+
           return (
-            <line
-              key={i}
-              x1={from.x}
-              y1={from.y}
-              x2={to.x}
-              y2={to.y}
-              stroke={from.color}
-              strokeWidth={1}
-              opacity={lineOpacity}
-            />
+            <React.Fragment key={i}>
+              <line
+                x1={from.x}
+                y1={from.y}
+                x2={to.x}
+                y2={to.y}
+                stroke={from.color}
+                strokeWidth={1}
+                opacity={lineOpacity}
+              />
+              {/* Flowing data dot 1 */}
+              <circle
+                cx={dotX}
+                cy={dotY}
+                r={3}
+                fill={from.color}
+                opacity={dotVisible * dotOpacity * lineOpacity * 3}
+              />
+              {/* Flowing data dot 2 (staggered) */}
+              <circle
+                cx={dotX2}
+                cy={dotY2}
+                r={2}
+                fill={from.color}
+                opacity={dotVisible * dotOpacity2 * lineOpacity * 2.5}
+              />
+            </React.Fragment>
           );
         })}
       </svg>
 
-      {/* Architecture nodes */}
-      {NODES.map((node, i) => (
-        <ArchNode
-          key={i}
-          label={node.label}
-          description={node.description}
-          color={node.color}
-          x={node.x}
-          y={node.y}
-          startFrame={node.start}
-          isCenter={node.isCenter}
-          width={node.isCenter ? 220 : 180}
-        />
-      ))}
+      {/* Architecture nodes — each wrapped with ZoomPunch for punch-in effect.
+          We position each wrapper at the node center and use a relative-positioned
+          inner container so ZoomPunch's scale transform originates from the node. */}
+      {NODES.map((node, i) => {
+        const nodeWidth = node.isCenter ? 220 : 180;
+        const nodeHeight = node.isCenter ? 76 : 56;
+        return (
+          <div
+            key={i}
+            style={{
+              position: "absolute",
+              left: node.x - nodeWidth / 2,
+              top: node.y - nodeHeight / 2,
+              width: nodeWidth,
+              height: nodeHeight,
+            }}
+          >
+            <ZoomPunch startFrame={node.start} from={1.3} damping={12}>
+              <ArchNode
+                label={node.label}
+                description={node.description}
+                color={node.color}
+                x={nodeWidth / 2}
+                y={nodeHeight / 2}
+                startFrame={node.start}
+                isCenter={node.isCenter}
+                width={nodeWidth}
+              />
+            </ZoomPunch>
+          </div>
+        );
+      })}
+
+      {/* PulseRing from Mistral center node — positioned so center aligns with node (960, 300) */}
+      <div
+        style={{
+          position: "absolute",
+          left: 960 - 400,
+          top: 300 - 400,
+          width: 800,
+          height: 800,
+          pointerEvents: "none",
+        }}
+      >
+        <PulseRing startFrame={120} count={3} color="#ff6b35" maxRadius={400} />
+      </div>
 
       {/* Bottom description */}
       <FadeIn delay={110} duration={20} style={{ position: "absolute", bottom: 60, left: 80, right: 80 }}>
@@ -120,6 +200,9 @@ export const S12_Architecture: React.FC = () => {
           Each agent runs independently with its own memory, personality model, and decision engine — all powered by Mistral AI
         </p>
       </FadeIn>
+
+      {/* ScanLines overlay */}
+      <ScanLines opacity={0.03} />
     </div>
   );
 };

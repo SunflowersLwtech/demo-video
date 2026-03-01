@@ -13,6 +13,10 @@ import { SciFiFloor3D } from "../components/three/SciFiFloor3D";
 import { StarField3D } from "../components/three/StarField3D";
 import { LieEntry } from "../components/ui/LieEntry";
 import { PhaseLabel } from "../components/ui/PhaseLabel";
+import { ScreenShake } from "../components/effects/ScreenShake";
+import { GlitchFlash } from "../components/effects/GlitchFlash";
+import { ContrastGrade } from "../components/effects/ContrastGrade";
+import { ScanLines } from "../components/effects/ScanLines";
 import { loadFont } from "@remotion/google-fonts/Inter";
 
 const { fontFamily } = loadFont();
@@ -21,7 +25,7 @@ const THOUGHT_DATA = [
   {
     agent: "lyra",
     thinks: "Marcus is getting too close to the truth. I need to redirect suspicion toward Zara.",
-    says: "I think we should consider Zara's behavior. She's been very aggressive — is she hiding something?",
+    says: "I think we should consider Zara's behavior. She's been very aggressive \u2014 is she hiding something?",
   },
   {
     agent: "viktor",
@@ -29,6 +33,9 @@ const THOUGHT_DATA = [
     says: "Let's not jump to conclusions. We should hear from everyone before making accusations.",
   },
 ];
+
+// Each thought entry appears at these frames
+const THOUGHT_START_FRAMES = THOUGHT_DATA.map((_, i) => 40 + i * 60);
 
 export const S08_InnerThoughts: React.FC = () => {
   const frame = useCurrentFrame();
@@ -42,7 +49,10 @@ export const S08_InnerThoughts: React.FC = () => {
   // Brain icon pulse
   const brainScale = 1 + Math.sin(frame * 0.15) * 0.05;
 
+  // Single subtle shake at first thought reveal
   return (
+    <ScreenShake startFrame={THOUGHT_START_FRAMES[0]} intensity={3} duration={8}>
+
     <div
       style={{
         width: "100%",
@@ -52,74 +62,108 @@ export const S08_InnerThoughts: React.FC = () => {
         display: "flex",
       }}
     >
-      {/* Left: 3D scene */}
-      <div style={{ width: "50%", height: "100%", position: "relative" }}>
-        <ThreeCanvas
-          width={width / 2}
-          height={height}
-          camera={{ position: [2.5, 2, 2.5], fov: 55 }}
+      {/* Left: 3D scene — blue tint for "thinks" side */}
+      <ContrastGrade brightness={0.95} contrast={1.05} saturate={0.9}>
+        <div
+          style={{
+            width: width / 2,
+            height: "100%",
+            position: "relative",
+            overflow: "hidden",
+          }}
         >
-          <SceneLighting3D phase="discussion" agents={AGENTS} />
-          <CouncilTable />
-          {AGENTS.map((agent) => (
-            <AgentFigure3D
-              key={agent.id}
-              config={agent}
-              isThinking={agent.id === "lyra" || agent.id === "viktor"}
-            />
-          ))}
-          <SciFiFloor3D />
-          <StarField3D />
-          <fog attach="fog" args={["#060612", 10, 30]} />
-        </ThreeCanvas>
-      </div>
+          <ThreeCanvas
+            width={width / 2}
+            height={height}
+            camera={{ position: [2.5, 2, 2.5], fov: 55 }}
+          >
+            <SceneLighting3D phase="discussion" agents={AGENTS} />
+            <CouncilTable />
+            {AGENTS.map((agent) => (
+              <AgentFigure3D
+                key={agent.id}
+                config={agent}
+                isThinking={agent.id === "lyra" || agent.id === "viktor"}
+              />
+            ))}
+            <SciFiFloor3D />
+            <StarField3D />
+            <fog attach="fog" args={["#060612", 10, 30]} />
+          </ThreeCanvas>
 
-      {/* Right: Thought panel */}
-      <div
-        style={{
-          width: "50%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          padding: "60px 40px",
-          opacity: panelOpacity,
-        }}
-      >
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+          {/* Blue tint overlay for "thinks" side */}
           <div
             style={{
-              fontSize: 36,
-              transform: `scale(${brainScale})`,
+              position: "absolute",
+              inset: 0,
+              background: "rgba(40, 80, 200, 0.08)",
+              pointerEvents: "none",
             }}
-          >
-            {"\u{1F9E0}"}
+          />
+        </div>
+      </ContrastGrade>
+
+      {/* Right: Thought panel — orange tint with subtle chromatic for "says" side */}
+      <ContrastGrade brightness={1.0} contrast={1.08} saturate={1.15}>
+        <div
+          style={{
+            width: width / 2,
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            padding: "60px 40px",
+            opacity: panelOpacity,
+            position: "relative",
+          }}
+        >
+          {/* Orange tint overlay for "says" side */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "rgba(200, 120, 40, 0.06)",
+              pointerEvents: "none",
+            }}
+          />
+
+          {/* Header */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24, position: "relative", zIndex: 1 }}>
+            <div
+              style={{
+                fontSize: 36,
+                transform: `scale(${brainScale})`,
+              }}
+            >
+              {"\u{1F9E0}"}
+            </div>
+            <div>
+              <PhaseLabel label="Inner Thoughts" color="#4466ff" />
+              <p style={{ fontFamily, fontSize: 14, color: "#71717a", margin: "4px 0 0" }}>
+                What they think vs. what they say
+              </p>
+            </div>
           </div>
-          <div>
-            <PhaseLabel label="Inner Thoughts" color="#4466ff" />
-            <p style={{ fontFamily, fontSize: 14, color: "#71717a", margin: "4px 0 0" }}>
-              What they think vs. what they say
-            </p>
+
+          {/* Thought entries */}
+          <div style={{ position: "relative", zIndex: 1 }}>
+            {THOUGHT_DATA.map((data, i) => {
+              const agent = AGENTS.find((a) => a.id === data.agent);
+              if (!agent) return null;
+              return (
+                <LieEntry
+                  key={i}
+                  truth={data.thinks}
+                  lie={data.says}
+                  agentName={agent.name}
+                  agentColor={agent.color}
+                  startFrame={THOUGHT_START_FRAMES[i]}
+                />
+              );
+            })}
           </div>
         </div>
-
-        {/* Thought entries */}
-        {THOUGHT_DATA.map((data, i) => {
-          const agent = AGENTS.find((a) => a.id === data.agent);
-          if (!agent) return null;
-          return (
-            <LieEntry
-              key={i}
-              truth={data.thinks}
-              lie={data.says}
-              agentName={agent.name}
-              agentColor={agent.color}
-              startFrame={40 + i * 60}
-            />
-          );
-        })}
-      </div>
+      </ContrastGrade>
 
       {/* Divider line */}
       <div
@@ -132,6 +176,20 @@ export const S08_InnerThoughts: React.FC = () => {
           background: "linear-gradient(to bottom, transparent, rgba(68,102,255,0.3), transparent)",
         }}
       />
+
+      {/* GlitchFlash at each thought entry transition moment */}
+      {THOUGHT_START_FRAMES.map((startFrame, i) => (
+        <GlitchFlash
+          key={`glitch-${i}`}
+          startFrame={startFrame}
+          duration={4}
+          color={i === 0 ? "#4466ff" : "#ff9060"}
+        />
+      ))}
+
+      {/* ScanLines overlay */}
+      <ScanLines opacity={0.03} />
     </div>
+    </ScreenShake>
   );
 };

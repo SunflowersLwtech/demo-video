@@ -2,6 +2,9 @@ import React from "react";
 import { useCurrentFrame, interpolate } from "remotion";
 import { SkillHexagon } from "../components/ui/SkillHexagon";
 import { FadeIn } from "../components/effects/FadeIn";
+import { ZoomPunch } from "../components/effects/ZoomPunch";
+import { PulseRing } from "../components/effects/PulseRing";
+import { ScanLines } from "../components/effects/ScanLines";
 import { loadFont } from "@remotion/google-fonts/Inter";
 
 const { fontFamily } = loadFont();
@@ -33,44 +36,46 @@ export const S06_SkillModules: React.FC = () => {
         overflow: "hidden",
       }}
     >
-      {/* Central Mistral logo */}
-      <div
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: "50%",
-          transform: `translate(-50%, -50%) scale(${logoScale})`,
-        }}
-      >
+      {/* Central Mistral logo — wrapped in ZoomPunch */}
+      <ZoomPunch startFrame={0} from={1.4} damping={12}>
         <div
           style={{
-            width: 100,
-            height: 100,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(255,107,53,0.2), rgba(255,107,53,0.05))",
-            border: "2px solid rgba(255,107,53,0.3)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: `0 0 40px rgba(255,107,53,${logoGlow})`,
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            transform: `translate(-50%, -50%) scale(${logoScale})`,
           }}
         >
-          {/* Mistral dots */}
-          <div style={{ display: "flex", gap: 4, flexWrap: "wrap", width: 40, justifyContent: "center" }}>
-            {[...Array(5)].map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  background: i % 2 === 0 ? "#ff6b35" : "#ffb347",
-                }}
-              />
-            ))}
+          <div
+            style={{
+              width: 100,
+              height: 100,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(255,107,53,0.2), rgba(255,107,53,0.05))",
+              border: "2px solid rgba(255,107,53,0.3)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: `0 0 40px rgba(255,107,53,${logoGlow})`,
+            }}
+          >
+            {/* Mistral dots */}
+            <div style={{ display: "flex", gap: 4, flexWrap: "wrap", width: 40, justifyContent: "center" }}>
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    background: i % 2 === 0 ? "#ff6b35" : "#ffb347",
+                  }}
+                />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </ZoomPunch>
 
       {/* Orbiting skill hexagons */}
       {SKILLS.map((skill, i) => (
@@ -84,6 +89,9 @@ export const S06_SkillModules: React.FC = () => {
           startFrame={15 + i * 8}
         />
       ))}
+
+      {/* PulseRing from center when all skills are orbiting (~frame 90) */}
+      <PulseRing startFrame={90} count={3} color="#ff6b35" maxRadius={400} />
 
       {/* Title */}
       <FadeIn delay={5} duration={15} style={{ position: "absolute", top: 60, left: 0, right: 0, textAlign: "center" }}>
@@ -100,6 +108,9 @@ export const S06_SkillModules: React.FC = () => {
           Cognitive Skill Modules
         </p>
       </FadeIn>
+
+      {/* ScanLines overlay */}
+      <ScanLines opacity={0.03} />
     </div>
   );
 };

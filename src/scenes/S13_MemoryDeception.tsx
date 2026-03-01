@@ -1,8 +1,11 @@
 import React from "react";
-import { useCurrentFrame, interpolate } from "remotion";
+import { useCurrentFrame, spring, useVideoConfig } from "remotion";
 import { GlassCard } from "../components/ui/GlassCard";
 import { FadeIn } from "../components/effects/FadeIn";
 import { PhaseLabel } from "../components/ui/PhaseLabel";
+import { GlitchFlash } from "../components/effects/GlitchFlash";
+import { ScanLines } from "../components/effects/ScanLines";
+import { ScreenShake } from "../components/effects/ScreenShake";
 import { loadFont as loadHeading } from "@remotion/google-fonts/PlayfairDisplay";
 import { loadFont as loadBody } from "@remotion/google-fonts/Inter";
 
@@ -27,8 +30,10 @@ const DECEPTIONS = [
 
 export const S13_MemoryDeception: React.FC = () => {
   const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
 
   return (
+    <ScreenShake startFrame={DECEPTIONS[0].frame} intensity={3} duration={8}>
     <div
       style={{
         width: "100%",
@@ -39,6 +44,14 @@ export const S13_MemoryDeception: React.FC = () => {
         display: "flex",
       }}
     >
+      {/* GlitchFlash on each deception card entrance */}
+      {DECEPTIONS.map((dec, i) => (
+        <GlitchFlash key={`glitch-${i}`} startFrame={dec.frame} duration={4} color="#FF6B6B" />
+      ))}
+
+      {/* ScanLines overlay */}
+      <ScanLines opacity={0.03} />
+
       {/* Left: Memory Timeline */}
       <div
         style={{
@@ -46,8 +59,19 @@ export const S13_MemoryDeception: React.FC = () => {
           padding: "60px 40px 60px 80px",
           display: "flex",
           flexDirection: "column",
+          position: "relative",
         }}
       >
+        {/* Subtle blue tint overlay for memory side */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "rgba(78, 205, 196, 0.04)",
+            pointerEvents: "none",
+          }}
+        />
+
         <FadeIn delay={5} duration={15}>
           <PhaseLabel label="Agent Memory" color="#4ECDC4" />
           <h2
@@ -78,12 +102,17 @@ export const S13_MemoryDeception: React.FC = () => {
           />
 
           {MEMORIES.map((mem, i) => {
-            const opacity = interpolate(
-              frame,
-              [mem.frame, mem.frame + 12],
-              [0, 1],
-              { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-            );
+            // Spring-based opacity instead of linear interpolate
+            const springProgress = spring({
+              frame: Math.max(0, frame - mem.frame),
+              fps,
+              config: {
+                damping: 14,
+                stiffness: 120,
+                mass: 0.8,
+              },
+            });
+            const opacity = frame < mem.frame ? 0 : springProgress;
             return (
               <div
                 key={i}
@@ -154,8 +183,19 @@ export const S13_MemoryDeception: React.FC = () => {
           padding: "60px 80px 60px 40px",
           display: "flex",
           flexDirection: "column",
+          position: "relative",
         }}
       >
+        {/* Subtle orange tint overlay for deception side */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "rgba(255, 107, 53, 0.04)",
+            pointerEvents: "none",
+          }}
+        />
+
         <FadeIn delay={15} duration={15}>
           <PhaseLabel label="Deception Tracking" color="#FF6B6B" />
           <h2
@@ -171,12 +211,17 @@ export const S13_MemoryDeception: React.FC = () => {
         </FadeIn>
 
         {DECEPTIONS.map((dec, i) => {
-          const opacity = interpolate(
-            frame,
-            [dec.frame, dec.frame + 15],
-            [0, 1],
-            { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-          );
+          // Spring-based opacity for deception cards
+          const springProgress = spring({
+            frame: Math.max(0, frame - dec.frame),
+            fps,
+            config: {
+              damping: 12,
+              stiffness: 100,
+              mass: 0.8,
+            },
+          });
+          const opacity = frame < dec.frame ? 0 : springProgress;
           return (
             <div key={i} style={{ opacity, marginBottom: 20 }}>
               <GlassCard padding={16} borderColor="rgba(255,107,53,0.1)">
@@ -233,5 +278,6 @@ export const S13_MemoryDeception: React.FC = () => {
         })}
       </div>
     </div>
+    </ScreenShake>
   );
 };
